@@ -16,8 +16,16 @@ class AssistenceRequest extends Model
 
     protected $fillable = [
         'email',
-        'oggetto',
-        'descrizione',
-        'allegati'
+        'object',
+        'description'
     ];
+
+    /**
+     * Definisce la relazione 1:N tra User e AssistentChat.
+     * Un utente può inviare più messaggi nella chat di assistenza.
+     */
+    public function chats()
+    {
+        return $this->hasMany(AssistentChat::class, 'idUser', 'id');
+    }
 }

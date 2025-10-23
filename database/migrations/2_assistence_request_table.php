@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attachments_requests', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('idTicket');
-            $table->string('fileName');
-            $table->string('path');
-            $table->string('type');
+        Schema::create('assistence_request', function (Blueprint $table) {
+            $table->id('idTicket');
+            $table->string('email');
+            $table->string('object');
+            $table->string('description',500);
+
             $table->timestamps();
             $table->softDeletes();
-
-            $table->foreign('idTicket')->references('idTicket')->on('assistence_request');
         });
     }
 
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attachments_requests');
+        Schema::dropIfExists('assistence_request');
     }
 };

@@ -8,19 +8,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
+    // Nome della tabella nel database
     protected $table = 'user';
     protected $primaryKey = 'idUser';
 
+    // Campi assegnabili in massa
     protected $fillable = [
+        'name',
+        'surname',
         'email',
         'created_at',
         'deleted_at'
     ];
 
-    public function ruoli()
+
+    //Questa Relazione ritorna tutti i tickets relativi all' utente
+    public function tickets()
     {
-        return $this->belongsToMany(Role::class, 'user_role', 'idUser', 'idRole');
+        return $this->hasMany(AssistentChat::class, 'idUser');
     }
+
 }

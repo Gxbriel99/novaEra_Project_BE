@@ -10,17 +10,19 @@ class AttachmentRequest extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'attachments_requests'; 
+    protected $table = 'attachment_request';
+    protected $primaryKey = 'idAttachment';
+
 
     protected $fillable = [
-        'idTicket',    
-        'fileName',    
-        'path',        
-        'type'        
+        'idTicket',
+        'fileName',
+        'path',
+        'type'
     ];
 
-    public function assistenceRequest()
+    public function ticket()
     {
-        return $this->belongsTo(assistenceRequest::class, 'idTicket', 'idTicket');
+        return $this->belongsTo(AssistentChat::class, 'idTicket');
     }
 }
