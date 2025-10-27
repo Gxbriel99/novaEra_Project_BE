@@ -19,7 +19,17 @@ Route::post('/sendMessage', [AssistentChatController::class, 'sendMessage']);
 
 
 //Questa Route ritorna tutti i ticket aperti dall'utente
-Route::get('/allTickets', [UserController::class, 'allTicket']);
+Route::get('/allTicketsAssistence', [UserController::class, 'allTicketAssistence']);
 
+//Questa Route ritorna tutti i ticket aperti dall'utente
+Route::post('/allTickets', [UserController::class, 'allTicket']);
 
+//
 Route::get('/Ticket/{idTicket}', [UserController::class, 'getTicket']);
+
+
+Route::get('/allChat/{idTicket}', [AssistentChatController::class, 'allChat']);
+
+
+
+

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Http\Requests\ResponseRequest;
 use App\Models\AssistentChat;
 use App\Models\AttachmentRequest;
@@ -9,6 +10,7 @@ use App\Models\AssistenceRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +36,7 @@ class AssistentChatController extends Controller
             if(!$idUtente) throw new Exception('Utente non trovato');
             
 
-            $filesAllegati = $request->file('attachment') ?? [];
+            $filesAllegati = $request->file('attachments') ?? [];
             $pathAllegati = 'private/assistenceRequest/' . $idTicket;
             $numeroAllegati = 0;
 
@@ -108,7 +110,7 @@ class AssistentChatController extends Controller
             if (!$idUtente) throw new Exception('Utente non trovato');
 
 
-            $filesAllegati = $request->file('attachment') ?? [];
+            $filesAllegati = $request->file('attachments') ?? [];
             $pathAllegati = 'private/assistenceRequest/' . $idTicket;
             $numeroAllegati = 0;
 
@@ -160,4 +162,11 @@ class AssistentChatController extends Controller
             ], 500);
         }
     }
+
+    public function allChat(Request $request)
+    {
+        return AssistentChat::where('idTicket', $request->idTicket)->select('message','response','idAttachment')->get();
+    }
+
+    
 }
