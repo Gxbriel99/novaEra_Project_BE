@@ -11,9 +11,7 @@ class User extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Nome della tabella nel database
-    protected $table = 'user';
-    protected $primaryKey = 'idUser';
+    
 
     // Campi assegnabili in massa
     protected $fillable = [
@@ -25,9 +23,6 @@ class User extends Model
     ];
 
 
-    public function tickets()
-    {
-        return $this->hasMany(AssistenceRequest::class, 'email', 'email');
-    }
+    
 
 }

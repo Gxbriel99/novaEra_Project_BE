@@ -1,0 +1,67 @@
+#------------------TICKET------------------------#
+
+input TicketInput {
+  name:String!
+  surname:String!
+  object: String!
+  email: String!
+  description: String!
+  attachments:[AttachmentInput]
+}
+
+input AttachmentInput {
+  file_name:String!
+  path:String!
+  type:String!
+}
+
+type TicketType {
+  id: ID!
+  email: String!
+  object: String!
+  description: String!
+}
+
+type AttachmentType {
+  id:ID!
+  assistence_request_id:ID!
+  file_name:String!
+  path:String!
+  type:String!
+}
+
+type ticketResponse{
+  success: Boolean!
+  message:String!
+  code:Int!
+}
+
+
+#-----------------QUERY-----------------#
+
+  type Query {
+  #----------Query per Ticket--------------#
+
+
+  # Regista Ticket
+  
+
+  # Singolo ticket
+  singleTicket(id: ID!): TicketType @find(model:"App\\Models\\AssistenceRequest")
+
+  # Lista di tutti i ticket
+  ticketsList: [TicketType!]! @all(model:"App\\Models\\AssistenceRequest")
+
+  #----------Query per Chat--------------#
+
+ 
+  }
+
+#---------------MUTATION-----------------#
+
+type Mutation {
+  createTicket(input: TicketInput!):ticketResponse
+  @field(resolver: "App\\Http\\Controllers\\AssistenceRequestController@createTicket")
+
+}
+

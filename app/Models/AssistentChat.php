@@ -10,20 +10,17 @@ class AssistentChat extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'assistent_chat';
-    protected $primaryKey = 'id';
-
-
+    
     protected $fillable = [
-        'idTicket',
-        'idUser',
+        'assistence_request_id',
+        'user_id',
         'message',
         'response',
-        'idAttachment',
+        'attachment_request_id',
     ];
 
-    public function attachment() 
+    public function attachment()
     {
-        return $this->hasMany(AttachmentRequest::class, 'idTicket');
+        return $this->hasMany(AttachmentRequest::class);
     }
 }

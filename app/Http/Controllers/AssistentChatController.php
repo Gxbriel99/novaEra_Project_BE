@@ -165,7 +165,7 @@ class AssistentChatController extends Controller
 
     public function allChat(Request $request)
     {
-        return AssistentChat::where('idTicket', $request->idTicket)->select('message','response','idAttachment')->get();
+        return AssistentChat::where('idTicket', $request->idTicket)->select('id','message','response','idAttachment')->get();
     }
 
     

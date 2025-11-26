@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assistent_chat', function (Blueprint $table) {
+        Schema::create('assistent_chats', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('idTicket'); // relazione con assistence_request
-            $table->unsignedBigInteger('idUser');   // relazione con users
+            $table->unsignedBigInteger('assistence_request_id'); // relazione con assistence_request
+            $table->unsignedBigInteger('user_id');   // relazione con users
             $table->string('message', 500)->nullable();
             $table->string('response', 500)->nullable();
-            $table->unsignedBigInteger('idAttachment')->nullable();
+            $table->unsignedBigInteger('attachment_request_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('idUser')->references('idUser')->on('user');
-            $table->foreign('idTicket')->references('idTicket')->on('assistence_request');
-            $table->foreign('idAttachment')->references('idAttachment')->on('attachment_request');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('assistence_request_id')->references('id')->on('assistence_requests');
+            $table->foreign('attachment_request_id')->references('id')->on('attachment_requests');
         });
     }
 
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assistent_chat');
+        Schema::dropIfExists('assistent_chats');
     }
 };
