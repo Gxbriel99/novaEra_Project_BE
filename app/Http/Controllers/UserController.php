@@ -11,27 +11,7 @@ use Illuminate\Http\Request;
 
 class UserController
 {
-    public function allTicketAssistence()
-    {
-        return AssistenceRequest::all()->select('idTicket', 'object');
-    }
-
-    public function allTicket(TicketRequest $request)
-    {
-        // 1. Ottengo l'email
-        $email = $request->validated('email');
-
-        $user = User::where('email', $email)->first();
-
-        if (!$user) {
-            return [];
-        }
-        // 3. Ottengo tutti i ticket
-        $tickets = $user->tickets()->get();
-
-        // 4. Restituisco i ticket, che ora includono i relativi allegati.
-        return $tickets;
-    }
+    
 
     public function getTicket(string $id)
     {

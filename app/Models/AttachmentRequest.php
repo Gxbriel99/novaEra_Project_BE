@@ -11,7 +11,7 @@ class AttachmentRequest extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'idTicket',
+        'assistence_request_id',
         'fileName',
         'path',
         'type'

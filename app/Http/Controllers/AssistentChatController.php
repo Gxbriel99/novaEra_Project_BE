@@ -7,166 +7,151 @@ use App\Http\Requests\ResponseRequest;
 use App\Models\AssistentChat;
 use App\Models\AttachmentRequest;
 use App\Models\AssistenceRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class AssistentChatController extends Controller
 {
-    public function sendResponse(ResponseRequest $request)
+    
+    public function sendResponse($_, array $args)
     {
-        // 1. Inizio della transazione 
+        $data = $args['input'];
+
+        $validator = Validator::make($data, (new ResponseRequest())->rules());
+
+        if ($validator->fails()) {
+            return [
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'code' => 422
+            ];
+        }
+
         DB::beginTransaction();
 
         try {
 
-            // --- RACCOLTA DATI ---
-            $dati = $request->validated();
-            $idTicket = $dati['idTicket'];
-            $risposta = $dati['response'];
+            // Recupera il ticket esistente
+            $ticket = AssistenceRequest::findOrFail($data['assistence_request_id']);
 
-            // Recupero l'idUser dal ticket 
-            $ticket = AssistentChat::findOrFail($idTicket);
-
-            $idUtente = $ticket->idUser;
-
-            if(!$idUtente) throw new Exception('Utente non trovato');
+            // Recupera l'utente dall'email
+            $user = User::where('email', $ticket->email)->firstOrFail();
             
 
-            $filesAllegati = $request->file('attachments') ?? [];
-            $pathAllegati = 'private/assistenceRequest/' . $idTicket;
-            $numeroAllegati = 0;
+            $filesAllegati = $data['attachments'] ?? []; 
 
-            // 2. INSERIMENTO RISPOSTA
-            AssistentChat::create([
-                'idTicket' => $idTicket,
-                'idUser'   => $idUtente, 
-                'message'  => null,
-                'response' => $risposta,
-                'idAttachment'=> $ticket->idAttachment
-            ]);
+            if (count($filesAllegati) > 0) {
+                foreach ($filesAllegati as $file) {
+                    $pathRelativo = $file->store('private'); // salva in storage/app/private
 
-            // 3. SALVATAGGIO ALLEGATI
-            foreach ($filesAllegati as $file) {
-
-                $pathRelativo = Storage::disk('local')->putFileAs(
-                    $pathAllegati,
-                    $file,
-                    $file->hashName()
-                );
-
-                AttachmentRequest::create([
-                    'idTicket' => $idTicket,
-                    'fileName' => $file->getClientOriginalName(),
-                    'path'     => $pathRelativo,
-                    'type'     => $file->getMimeType(),
-                ]);
-
-                $numeroAllegati++;
+                    AttachmentRequest::create([
+                        'assistence_request_id' => $ticket->id,
+                        'file_name'  => $file->getClientOriginalName(),
+                        'path'       => $pathRelativo,
+                        'type'       => $file->getMimeType(),
+                    ]);
+                }
             }
 
-            // 4. Conferma (se tutto è andato bene)
+        
+           
+            AssistentChat::create([
+                'assistence_request_id'  => $ticket->id,
+                'user_id'                => $user->id,
+                'message'                => null,
+                'response'               => $data['response'],
+                'attachment_request_id'  => $attachmentIds[0] ?? null, // usa il primo allegato se presente
+            ]);
+
             DB::commit();
 
-            // 5. Risposta di Successo
-            return response()->json([
-                'successo' => true,
-                'messaggio' => "Risposta inviata al ticket #{$idTicket}."
-            ], 201);
-        } catch (Exception $e) {
-
-            // 6. Rollback se qualcosa fallisce
+            return [
+                'success' => true,
+                'message' => 'Risposta inviata con successo',
+                'code' => 201
+            ];
+        } catch (\Exception $e) {
             DB::rollBack();
 
-            // 7. Risposta di Errore
-            return response()->json([
-                'successo' => false,
-                'errore_dettaglio' => $e->getMessage() 
-            ], 500);
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 500
+            ];
         }
     }
 
-    public function sendMessage(ResponseRequest $request)
+    public function sendMessage($_, array $args)
     {
-        // 1. Inizio della transazione 
+        $data = $args['input'];
+
+        $validator = Validator::make($data, (new ResponseRequest())->rules());
+
+        if ($validator->fails()) {
+            return [
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'code' => 422
+            ];
+        }
+
         DB::beginTransaction();
 
         try {
 
-            // --- RACCOLTA DATI ---
-            $dati = $request->validated();
+            // Recupera il ticket esistente
+            $ticket = AssistenceRequest::findOrFail($data['assistence_request_id']);
 
-            $idTicket = $dati['idTicket'];
-            $message = $dati['message'];
-
-            // Recupero l'idUser dal ticket 
-            $ticket = AssistentChat::findOrFail($idTicket);
-
-            $idUtente = $ticket->idUser;
-
-            if (!$idUtente) throw new Exception('Utente non trovato');
+            // Recupera l'utente dall'email
+            $user = User::where('email', $ticket->email)->firstOrFail();
 
 
-            $filesAllegati = $request->file('attachments') ?? [];
-            $pathAllegati = 'private/assistenceRequest/' . $idTicket;
-            $numeroAllegati = 0;
+            $filesAllegati = $data['attachments'] ?? [];
 
-            // 2. INSERIMENTO RISPOSTA
-            AssistentChat::create([
-                'idTicket' => $idTicket,
-                'idUser'   => $idUtente,
-                'message'  => $message,
-                'response' => null,
-                'idAttachment' => $ticket->idAttachment
-            ]);
+            if (count($filesAllegati) > 0) {
+                foreach ($filesAllegati as $file) {
+                    $pathRelativo = $file->store('private'); // salva in storage/app/private
 
-            // 3. SALVATAGGIO ALLEGATI
-            foreach ($filesAllegati as $file) {
-
-                $pathRelativo = Storage::disk('local')->putFileAs(
-                    $pathAllegati,
-                    $file,
-                    $file->hashName()
-                );
-
-                AttachmentRequest::create([
-                    'idTicket' => $idTicket,
-                    'fileName' => $file->getClientOriginalName(),
-                    'path'     => $pathRelativo,
-                    'type'     => $file->getMimeType(),
-                ]);
-
-                $numeroAllegati++;
+                    AttachmentRequest::create([
+                        'assistence_request_id' => $ticket->id,
+                        'file_name'  => $file->getClientOriginalName(),
+                        'path'       => $pathRelativo,
+                        'type'       => $file->getMimeType(),
+                    ]);
+                }
             }
 
-            // 4. Conferma (se tutto è andato bene)
+
+
+            AssistentChat::create([
+                'assistence_request_id'  => $ticket->id,
+                'user_id'                => $user->id,
+                'message'                => $data['message'],
+                'response'               => null,
+                'attachment_request_id'  => $attachmentIds[0] ?? null, // usa il primo allegato se presente
+            ]);
+
             DB::commit();
 
-            // 5. Risposta di Successo
-            return response()->json([
-                'successo' => true,
-                'messaggio' => "Risposta inviata al ticket #{$idTicket}."
-            ], 201);
-        } catch (Exception $e) {
-
-            // 6. Rollback se qualcosa fallisce
+            return [
+                'success' => true,
+                'message' => 'Messaggio inviato con successo',
+                'code' => 201
+            ];
+        } catch (\Exception $e) {
             DB::rollBack();
 
-            // 7. Risposta di Errore
-            return response()->json([
-                'successo' => false,
-                'errore_dettaglio' => $e->getMessage()
-            ], 500);
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 500
+            ];
         }
     }
-
-    public function allChat(Request $request)
-    {
-        return AssistentChat::where('idTicket', $request->idTicket)->select('id','message','response','idAttachment')->get();
-    }
-
-    
 }

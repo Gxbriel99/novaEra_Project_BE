@@ -36,32 +36,61 @@ type ticketResponse{
   code:Int!
 }
 
+#------------------CHAT------------------------#
+
+type ChatType {
+  id: ID!
+  assistence_request_id:Int!
+  user_id:Int!
+  message: String
+  response: String
+  attachment_request_id: Int
+}
+
+input MessageInput {
+  assistence_request_id:Int!
+  message: String
+  response: String
+  attachments:[AttachmentInput]
+}
 
 #-----------------QUERY-----------------#
 
   type Query {
   #----------Query per Ticket--------------#
-
-
-  # Regista Ticket
   
-
-  # Singolo ticket
-  singleTicket(id: ID!): TicketType @find(model:"App\\Models\\AssistenceRequest")
-
   # Lista di tutti i ticket
-  ticketsList: [TicketType!]! @all(model:"App\\Models\\AssistenceRequest")
+    ticketsList: [TicketType!]! @all(model:"App\\Models\\AssistenceRequest")
+  
+  # Lista di tutti i ticket dell'utente
+    userTicketsList(email: String!): [TicketType!]!
+      @all(model: "App\\Models\\AssistenceRequest", scopes:["FilterByEmail"])
 
-  #----------Query per Chat--------------#
 
+  # Ottieni la chat relativa al ticket fornito
+    getChat(assistence_request_id: Int!): [ChatType!]!
+      @all(model:"App\\Models\\AssistentChat", scopes:["findChatByIdTicket"])
  
   }
+
+ 
+
 
 #---------------MUTATION-----------------#
 
 type Mutation {
-  createTicket(input: TicketInput!):ticketResponse
-  @field(resolver: "App\\Http\\Controllers\\AssistenceRequestController@createTicket")
+
+  # Regista Ticket
+    createTicket(input: TicketInput!):ticketResponse
+      @field(resolver: "App\\Http\\Controllers\\AssistenceRequestController@createTicket")
+
+  # Invia Risposta
+    sendResponse(input :MessageInput!):ticketResponse
+      @field(resolver: "App\\Http\\Controllers\\AssistentChatController@sendResponse")
+      
+      # Invia Risposta
+    sendMessage(input :MessageInput!):ticketResponse
+      @field(resolver: "App\\Http\\Controllers\\AssistentChatController@sendMessage")
 
 }
 

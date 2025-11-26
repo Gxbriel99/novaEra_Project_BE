@@ -22,11 +22,11 @@ class ResponseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'idTicket' => 'required|integer|exists:assistence_request,idTicket',
+            'assistence_request_id' => 'required|integer|exists:assistence_requests,id',
             'response' => 'nullable|string|max:500',
             'message' => 'nullable|string|max:500',
-            'attachment' => 'nullable|array',
-            'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,mp4,pdf,doc,docx|max:10240',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|mimes:jpg,jpeg,png,gif,mp4,pdf,doc,docx|max:10240',
         ];
     }
 }

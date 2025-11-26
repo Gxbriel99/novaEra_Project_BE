@@ -23,4 +23,11 @@ class AssistentChat extends Model
     {
         return $this->hasMany(AttachmentRequest::class);
     }
+
+    //----------SCOPE------------//
+
+    public function scopefindChatByIdTicket($query, $assistence_request_id)
+    {
+        return $query->where('assistence_request_id', $assistence_request_id);
+    }
 }

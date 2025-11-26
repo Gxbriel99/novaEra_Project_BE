@@ -19,4 +19,10 @@ class AssistenceRequest extends Model
     public function User() {
         return $this->belongsTo(User::class);
     }
+
+    //------------------------SCOPE------------------------------//
+
+    public function scopeFilterByEmail($query,$email){
+        return $query -> where("email",$email);
+    }
 }
